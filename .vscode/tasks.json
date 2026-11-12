@@ -1,0 +1,34 @@
+
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build cFS",
+            "type": "shell",
+            "command": "make native_std.install",
+            "options": {
+                "cwd": "${workspaceFolder}/../.."
+            },
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run cFS",
+            "type": "shell",
+            "command": "./core-cpu1",
+            "options": {
+                "cwd": "${workspaceFolder}/../../build-native_std/exe/cpu1"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Test Battery",
+            "type": "shell",
+            "command": "g++ tests/battery_test.cpp -o /tmp/battery_test && /tmp/battery_test",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
