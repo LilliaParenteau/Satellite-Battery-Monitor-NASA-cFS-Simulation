@@ -17,6 +17,10 @@ I also used this project to get more experience working with CMake, Linux, and s
 - Includes a separate C++ program to test the battery simulation
 - Includes VS Code tasks for building, running, and testing
 
+## Screenshot
+
+![Battery Monitor running in NASA cFS](Screen%20Shots/battery-monitor.png)
+
 ## Technologies
 
 - C++
