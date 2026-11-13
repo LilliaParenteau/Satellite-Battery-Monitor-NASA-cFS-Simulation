@@ -1,0 +1,21 @@
+
+# Build files
+build/
+build-*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Compiled files
+*.o
+*.obj
+*.exe
+*.out
+
+# Temporary files
+*.log
+*.tmp
+*.swp
+.DS_Store
