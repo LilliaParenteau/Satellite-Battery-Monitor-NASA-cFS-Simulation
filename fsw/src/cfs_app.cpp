@@ -22,12 +22,16 @@ extern "C" void BATMON_Main(void)
 
     int batteryLevel = 70;
     int warningThreshold = 20;
+    int criticalThreshold = 10;
     int chargeRate = 5;
     int dischargeRate = 10;
 
     bool inSunlight = true;
     int phaseTime = 0;
     int phaseDuration = 5;
+
+    BatteryStatus previousStatus = GetBatteryStatus(
+        batteryLevel, warningThreshold, criticalThreshold);
 
     // Simulate battery charging and discharging
     while (CFE_ES_RunLoop(&runStatus))
@@ -41,10 +45,33 @@ extern "C" void BATMON_Main(void)
                           "Phase: %s | Battery: %d%%",
                           phase, batteryLevel);
 
-        if (IsBatteryLow(batteryLevel, warningThreshold))
+        // Check the current battery status
+        BatteryStatus currentStatus = GetBatteryStatus(
+            batteryLevel, warningThreshold, criticalThreshold);
+
+        // Report warnings only when the status changes
+        if (currentStatus != previousStatus)
         {
-            CFE_EVS_SendEvent(3, CFE_EVS_EventType_ERROR,
-                              "Warning: Low Battery!");
+            if (currentStatus == BatteryStatus::Warning)
+            {
+                CFE_EVS_SendEvent(3, CFE_EVS_EventType_ERROR,
+                                  "Warning: Battery low at %d%%",
+                                  batteryLevel);
+            }
+            else if (currentStatus == BatteryStatus::Critical)
+            {
+                CFE_EVS_SendEvent(5, CFE_EVS_EventType_ERROR,
+                                  "Critical: Battery at %d%%",
+                                  batteryLevel);
+            }
+            else
+            {
+                CFE_EVS_SendEvent(6, CFE_EVS_EventType_INFORMATION,
+                                  "Battery recovered to normal: %d%%",
+                                  batteryLevel);
+            }
+
+            previousStatus = currentStatus;
         }
 
         phaseTime++;

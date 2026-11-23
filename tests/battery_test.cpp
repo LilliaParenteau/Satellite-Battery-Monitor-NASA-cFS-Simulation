@@ -35,6 +35,21 @@ int main()
     // Test minimum battery capacity during an eclipse
     assert(UpdateBatteryForPhase(3, false, 10, 5) == 0);
 
+    // Test normal battery status
+    assert(GetBatteryStatus(100, 20, 10) == BatteryStatus::Normal);
+    assert(GetBatteryStatus(21, 20, 10) == BatteryStatus::Normal);
+
+    // Test warning battery status
+    assert(GetBatteryStatus(20, 20, 10) == BatteryStatus::Warning);
+    assert(GetBatteryStatus(11, 20, 10) == BatteryStatus::Warning);
+
+    // Test critical battery status
+    assert(GetBatteryStatus(10, 20, 10) == BatteryStatus::Critical);
+    assert(GetBatteryStatus(0, 20, 10) == BatteryStatus::Critical);
+
+    // Test recovery to normal status
+    assert(GetBatteryStatus(25, 20, 10) == BatteryStatus::Normal);
+
     cout << "All battery logic tests passed!" << endl;
 
     return 0;

@@ -36,3 +36,20 @@ int UpdateBatteryForPhase(int currentLevel, bool inSunlight,
         return UpdateBatteryLevel(currentLevel, -dischargeRate);
     }
 }
+
+// Determine the current battery status
+BatteryStatus GetBatteryStatus(int batteryLevel,
+                               int warningThreshold,
+                               int criticalThreshold)
+{
+    if (batteryLevel <= criticalThreshold)
+    {
+        return BatteryStatus::Critical;
+    }
+    else if (batteryLevel <= warningThreshold)
+    {
+        return BatteryStatus::Warning;
+    }
+
+    return BatteryStatus::Normal;
+}
