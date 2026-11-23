@@ -2,11 +2,20 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Configure cFS",
+            "type": "shell",
+            "command": "make native_std.prep",
+            "options": {
+                "cwd": "/home/LilliaP/cFS"
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Build cFS",
             "type": "shell",
             "command": "make native_std.install",
             "options": {
-                "cwd": "${workspaceFolder}/../.."
+                "cwd": "/home/LilliaP/cFS"
             },
             "group": "build",
             "problemMatcher": []
@@ -16,7 +25,7 @@
             "type": "shell",
             "command": "./core-cpu1",
             "options": {
-                "cwd": "${workspaceFolder}/../../build-native_std/exe/cpu1"
+                "cwd": "/home/LilliaP/cFS/build-native_std/exe/cpu1"
             },
             "problemMatcher": []
         },
