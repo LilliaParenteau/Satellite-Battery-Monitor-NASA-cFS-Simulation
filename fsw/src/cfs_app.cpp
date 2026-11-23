@@ -1,10 +1,12 @@
+#include "battery_logic.h"
+
 extern "C"
 {
     #include "cfe.h"
     #include "osapi.h"
 }
 
-// Starts the app
+// Starts the battery monitor app
 extern "C" void BATMON_Main(void)
 {
     uint32 runStatus = CFE_ES_RunStatus_APP_RUN;
@@ -16,29 +18,30 @@ extern "C" void BATMON_Main(void)
     }
 
     CFE_EVS_SendEvent(1, CFE_EVS_EventType_INFORMATION,
-                        "Battery Monitor started");
+                      "Battery Monitor started");
 
     int batteryLevel = 100;
+    int warningThreshold = 20;
 
-    // Check the battery level
+    // Monitor the battery level
     while (CFE_ES_RunLoop(&runStatus))
     {
         if (batteryLevel > 0)
         {
             CFE_EVS_SendEvent(2, CFE_EVS_EventType_INFORMATION,
-                                "Battery: %d%%", batteryLevel);
+                              "Battery: %d%%", batteryLevel);
 
-            if (batteryLevel <= 20)
+            if (IsBatteryLow(batteryLevel, warningThreshold))
             {
                 CFE_EVS_SendEvent(3, CFE_EVS_EventType_ERROR,
-                                    "Warning: Low Battery!");
+                                  "Warning: Low Battery!");
             }
-            
-            batteryLevel -= 10;
+
+            batteryLevel = UpdateBatteryLevel(batteryLevel, -10);
         }
 
         OS_TaskDelay(1000);
     }
 
     CFE_ES_ExitApp(runStatus);
-}   
+}

@@ -1,21 +1,29 @@
 #include <iostream>
+#include <cassert>
+#include "../fsw/src/battery_logic.h"
+
 using namespace std;
 
 int main()
 {
-    int batteryLevel = 100;
+    // Test normal battery discharge
+    assert(UpdateBatteryLevel(100, -10) == 90);
 
-    while (batteryLevel > 0)
-    {
-        cout << "Battery: " << batteryLevel << "%" << endl;
+    // Test battery charging
+    assert(UpdateBatteryLevel(50, 10) == 60);
 
-        if (batteryLevel <= 20)
-        {
-            cout << "Warning: Low Battery!" << endl;
-        }
+    // Battery cannot exceed 100%
+    assert(UpdateBatteryLevel(95, 10) == 100);
 
-        batteryLevel -= 10;
-    }
+    // Battery cannot drop below 0%
+    assert(UpdateBatteryLevel(5, -10) == 0);
+
+    // Test low battery warnings
+    assert(IsBatteryLow(20, 20));
+    assert(IsBatteryLow(10, 20));
+    assert(!IsBatteryLow(30, 20));
+
+    cout << "All battery logic tests passed!" << endl;
 
     return 0;
 }

@@ -1,4 +1,3 @@
-
 {
     "version": "2.0.0",
     "tasks": [
@@ -24,7 +23,10 @@
         {
             "label": "Test Battery",
             "type": "shell",
-            "command": "g++ tests/battery_test.cpp -o /tmp/battery_test && /tmp/battery_test",
+            "command": "g++ -std=c++17 -Wall -Wextra -pedantic tests/battery_test.cpp fsw/src/battery_logic.cpp -o /tmp/battery_test && /tmp/battery_test",
+            "windows": {
+                "command": "g++ -std=c++17 -Wall -Wextra -pedantic tests/battery_test.cpp fsw/src/battery_logic.cpp -o battery_test.exe; if ($LASTEXITCODE -eq 0) { .\\battery_test.exe }"
+            },
             "options": {
                 "cwd": "${workspaceFolder}"
             },
