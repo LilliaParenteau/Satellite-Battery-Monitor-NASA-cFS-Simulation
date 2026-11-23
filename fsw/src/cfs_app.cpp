@@ -20,24 +20,44 @@ extern "C" void BATMON_Main(void)
     CFE_EVS_SendEvent(1, CFE_EVS_EventType_INFORMATION,
                       "Battery Monitor started");
 
-    int batteryLevel = 100;
+    int batteryLevel = 70;
     int warningThreshold = 20;
+    int chargeRate = 5;
+    int dischargeRate = 10;
 
-    // Monitor the battery level
+    bool inSunlight = true;
+    int phaseTime = 0;
+    int phaseDuration = 5;
+
+    // Simulate battery charging and discharging
     while (CFE_ES_RunLoop(&runStatus))
     {
-        if (batteryLevel > 0)
+        batteryLevel = UpdateBatteryForPhase(
+            batteryLevel, inSunlight, chargeRate, dischargeRate);
+
+        const char* phase = inSunlight ? "Sunlight" : "Eclipse";
+
+        CFE_EVS_SendEvent(2, CFE_EVS_EventType_INFORMATION,
+                          "Phase: %s | Battery: %d%%",
+                          phase, batteryLevel);
+
+        if (IsBatteryLow(batteryLevel, warningThreshold))
         {
-            CFE_EVS_SendEvent(2, CFE_EVS_EventType_INFORMATION,
-                              "Battery: %d%%", batteryLevel);
+            CFE_EVS_SendEvent(3, CFE_EVS_EventType_ERROR,
+                              "Warning: Low Battery!");
+        }
 
-            if (IsBatteryLow(batteryLevel, warningThreshold))
-            {
-                CFE_EVS_SendEvent(3, CFE_EVS_EventType_ERROR,
-                                  "Warning: Low Battery!");
-            }
+        phaseTime++;
 
-            batteryLevel = UpdateBatteryLevel(batteryLevel, -10);
+        // Switch between sunlight and eclipse
+        if (phaseTime >= phaseDuration)
+        {
+            inSunlight = !inSunlight;
+            phaseTime = 0;
+
+            CFE_EVS_SendEvent(4, CFE_EVS_EventType_INFORMATION,
+                              "Entering %s",
+                              inSunlight ? "Sunlight" : "Eclipse");
         }
 
         OS_TaskDelay(1000);

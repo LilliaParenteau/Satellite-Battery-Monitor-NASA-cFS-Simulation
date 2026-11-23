@@ -23,6 +23,18 @@ int main()
     assert(IsBatteryLow(10, 20));
     assert(!IsBatteryLow(30, 20));
 
+    // Test battery charging during sunlight
+    assert(UpdateBatteryForPhase(50, true, 10, 5) == 60);
+
+    // Test battery discharging during an eclipse
+    assert(UpdateBatteryForPhase(50, false, 10, 5) == 45);
+
+    // Test maximum battery capacity during sunlight
+    assert(UpdateBatteryForPhase(95, true, 10, 5) == 100);
+
+    // Test minimum battery capacity during an eclipse
+    assert(UpdateBatteryForPhase(3, false, 10, 5) == 0);
+
     cout << "All battery logic tests passed!" << endl;
 
     return 0;

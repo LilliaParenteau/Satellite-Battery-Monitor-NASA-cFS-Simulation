@@ -22,3 +22,17 @@ bool IsBatteryLow(int batteryLevel, int warningThreshold)
 {
     return batteryLevel <= warningThreshold;
 }
+
+// Charge during sunlight and discharge during an eclipse
+int UpdateBatteryForPhase(int currentLevel, bool inSunlight,
+                          int chargeRate, int dischargeRate)
+{
+    if (inSunlight)
+    {
+        return UpdateBatteryLevel(currentLevel, chargeRate);
+    }
+    else
+    {
+        return UpdateBatteryLevel(currentLevel, -dischargeRate);
+    }
+}
