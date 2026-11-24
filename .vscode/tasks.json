@@ -40,6 +40,15 @@
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Run Battery Demo",
+            "type": "shell",
+            "command": "g++ -std=c++17 -Wall -Wextra -pedantic demo/battery_demo.cpp fsw/src/battery_logic.cpp -o /tmp/battery_demo && /tmp/battery_demo",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
         }
     ]
 }
