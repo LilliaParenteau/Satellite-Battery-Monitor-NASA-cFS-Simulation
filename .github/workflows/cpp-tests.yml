@@ -1,0 +1,43 @@
+name: C++ Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Compile battery logic tests
+        run: |
+          g++ -std=c++17 -Wall -Wextra -pedantic \
+            tests/battery_test.cpp \
+            fsw/src/battery_logic.cpp \
+            -o battery_test
+
+      - name: Run battery logic tests
+        run: ./battery_test
+
+      - name: Compile standalone demo
+        run: |
+          g++ -std=c++17 -Wall -Wextra -pedantic \
+            demo/battery_demo.cpp \
+            fsw/src/battery_logic.cpp \
+            -o battery_demo
+
+      - name: Test all simulation scenarios
+        run: |
+          for choice in 1 2 3
+          do
+            output=$(printf '%s\n' "$choice" | ./battery_demo)
+            echo "$output" | grep -q "Simulation complete."
+          done
+
+      - name: Test invalid scenario selection
+        run: |
+          output=$(printf '4\n' | ./battery_demo || true)
+          echo "$output" | grep -q "Invalid scenario selection."
