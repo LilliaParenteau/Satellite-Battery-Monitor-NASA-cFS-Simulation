@@ -50,6 +50,30 @@ int main()
     // Test recovery to normal status
     assert(GetBatteryStatus(25, 20, 10) == BatteryStatus::Normal);
 
+    // Test normal operation scenario
+    ScenarioSettings normal = GetScenarioSettings(BatteryScenario::Normal);
+    assert(normal.startingLevel == 70);
+    assert(normal.chargeRate == 5);
+    assert(normal.dischargeRate == 10);
+    assert(normal.sunlightDuration == 5);
+    assert(normal.eclipseDuration == 5);
+
+    // Test extended eclipse scenario
+    ScenarioSettings eclipse = GetScenarioSettings(BatteryScenario::ExtendedEclipse);
+    assert(eclipse.startingLevel == 70);
+    assert(eclipse.chargeRate == 5);
+    assert(eclipse.dischargeRate == 10);
+    assert(eclipse.sunlightDuration == 3);
+    assert(eclipse.eclipseDuration == 10);
+
+    // Test high power consumption scenario
+    ScenarioSettings highLoad = GetScenarioSettings(BatteryScenario::HighLoad);
+    assert(highLoad.startingLevel == 70);
+    assert(highLoad.chargeRate == 2);
+    assert(highLoad.dischargeRate == 15);
+    assert(highLoad.sunlightDuration == 5);
+    assert(highLoad.eclipseDuration == 5);
+
     cout << "All battery logic tests passed!" << endl;
 
     return 0;

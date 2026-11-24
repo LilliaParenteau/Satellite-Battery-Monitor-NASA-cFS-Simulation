@@ -9,6 +9,24 @@ enum class BatteryStatus
     Critical
 };
 
+// Available simulation scenarios
+enum class BatteryScenario
+{
+    Normal,
+    ExtendedEclipse,
+    HighLoad
+};
+
+// Settings for each simulation scenario
+struct ScenarioSettings
+{
+    int startingLevel;
+    int chargeRate;
+    int dischargeRate;
+    int sunlightDuration;
+    int eclipseDuration;
+};
+
 int UpdateBatteryLevel(int currentLevel, int change);
 
 bool IsBatteryLow(int batteryLevel, int warningThreshold);
@@ -21,5 +39,8 @@ int UpdateBatteryForPhase(int currentLevel, bool inSunlight,
 BatteryStatus GetBatteryStatus(int batteryLevel,
                                int warningThreshold,
                                int criticalThreshold);
+
+// Get settings for the selected simulation scenario
+ScenarioSettings GetScenarioSettings(BatteryScenario scenario);
 
 #endif

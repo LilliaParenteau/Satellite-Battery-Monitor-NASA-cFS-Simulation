@@ -6,6 +6,9 @@ extern "C"
     #include "osapi.h"
 }
 
+// Select the simulation scenario
+const BatteryScenario selectedScenario = BatteryScenario::Normal;
+
 // Starts the battery monitor app
 extern "C" void BATMON_Main(void)
 {
@@ -17,18 +20,29 @@ extern "C" void BATMON_Main(void)
         return;
     }
 
-    CFE_EVS_SendEvent(1, CFE_EVS_EventType_INFORMATION,
-                      "Battery Monitor started");
+    // Load the selected scenario settings
+    ScenarioSettings settings = GetScenarioSettings(selectedScenario);
 
-    int batteryLevel = 70;
+    const char* scenarioName = "Normal Operation";
+
+    if (selectedScenario == BatteryScenario::ExtendedEclipse)
+    {
+        scenarioName = "Extended Eclipse";
+    }
+    else if (selectedScenario == BatteryScenario::HighLoad)
+    {
+        scenarioName = "High Power Consumption";
+    }
+
+    CFE_EVS_SendEvent(1, CFE_EVS_EventType_INFORMATION,
+                      "Battery Monitor started: %s", scenarioName);
+
+    int batteryLevel = settings.startingLevel;
     int warningThreshold = 20;
     int criticalThreshold = 10;
-    int chargeRate = 5;
-    int dischargeRate = 10;
 
     bool inSunlight = true;
     int phaseTime = 0;
-    int phaseDuration = 5;
 
     BatteryStatus previousStatus = GetBatteryStatus(
         batteryLevel, warningThreshold, criticalThreshold);
@@ -37,7 +51,10 @@ extern "C" void BATMON_Main(void)
     while (CFE_ES_RunLoop(&runStatus))
     {
         batteryLevel = UpdateBatteryForPhase(
-            batteryLevel, inSunlight, chargeRate, dischargeRate);
+            batteryLevel,
+            inSunlight,
+            settings.chargeRate,
+            settings.dischargeRate);
 
         const char* phase = inSunlight ? "Sunlight" : "Eclipse";
 
@@ -49,7 +66,7 @@ extern "C" void BATMON_Main(void)
         BatteryStatus currentStatus = GetBatteryStatus(
             batteryLevel, warningThreshold, criticalThreshold);
 
-        // Report warnings only when the status changes
+        // Report events only when the battery status changes
         if (currentStatus != previousStatus)
         {
             if (currentStatus == BatteryStatus::Warning)
@@ -76,7 +93,11 @@ extern "C" void BATMON_Main(void)
 
         phaseTime++;
 
-        // Switch between sunlight and eclipse
+        // Use the selected scenario's phase durations
+        int phaseDuration = inSunlight
+            ? settings.sunlightDuration
+            : settings.eclipseDuration;
+
         if (phaseTime >= phaseDuration)
         {
             inSunlight = !inSunlight;

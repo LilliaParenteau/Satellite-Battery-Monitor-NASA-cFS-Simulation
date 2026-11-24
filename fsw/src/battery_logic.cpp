@@ -53,3 +53,21 @@ BatteryStatus GetBatteryStatus(int batteryLevel,
 
     return BatteryStatus::Normal;
 }
+
+// Return the settings for the selected scenario
+ScenarioSettings GetScenarioSettings(BatteryScenario scenario)
+{
+    switch (scenario)
+    {
+        case BatteryScenario::Normal:
+            return {70, 5, 10, 5, 5};
+
+        case BatteryScenario::ExtendedEclipse:
+            return {70, 5, 10, 3, 10};
+
+        case BatteryScenario::HighLoad:
+            return {70, 2, 15, 5, 5};
+    }
+
+    return {70, 5, 10, 5, 5};
+}
