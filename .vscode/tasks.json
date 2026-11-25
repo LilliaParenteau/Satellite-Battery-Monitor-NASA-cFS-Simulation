@@ -23,9 +23,16 @@
         {
             "label": "Run cFS",
             "type": "shell",
-            "command": "./core-cpu1",
-            "dependsOn": "Build cFS",
-            "dependsOrder": "sequence",
+            "command": "printf 'scenario=%s\\n' '${input:batteryScenario}' > cf/scenario.cfg && ./core-cpu1",
+            "options": {
+                "cwd": "${env:HOME}/cFS/build-native_std/exe/cpu1"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run cFS (Config File)",
+            "type": "shell",
+            "command": "cp \"${workspaceFolder}/config/scenario.cfg\" cf/scenario.cfg && ./core-cpu1",
             "options": {
                 "cwd": "${env:HOME}/cFS/build-native_std/exe/cpu1"
             },
@@ -35,9 +42,6 @@
             "label": "Test Battery",
             "type": "shell",
             "command": "g++ -std=c++17 -Wall -Wextra -pedantic tests/battery_test.cpp fsw/src/battery_logic.cpp -o /tmp/battery_test && /tmp/battery_test",
-            "windows": {
-                "command": "g++ -std=c++17 -Wall -Wextra -pedantic tests/battery_test.cpp fsw/src/battery_logic.cpp -o battery_test.exe; if ($LASTEXITCODE -eq 0) { .\\battery_test.exe }"
-            },
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -51,6 +55,28 @@
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "batteryScenario",
+            "type": "pickString",
+            "description": "Select the battery simulation scenario",
+            "options": [
+                {
+                    "label": "1 - Normal Operation",
+                    "value": "1"
+                },
+                {
+                    "label": "2 - Extended Eclipse",
+                    "value": "2"
+                },
+                {
+                    "label": "3 - High Power Consumption",
+                    "value": "3"
+                }
+            ],
+            "default": "1"
         }
     ]
 }

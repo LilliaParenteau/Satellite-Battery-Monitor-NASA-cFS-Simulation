@@ -1,13 +1,65 @@
 #include "battery_logic.h"
 
+#include <sstream>
+#include <string>
+
 extern "C"
 {
     #include "cfe.h"
     #include "osapi.h"
 }
 
-// Select the simulation scenario
-const BatteryScenario selectedScenario = BatteryScenario::Normal;
+// Read the scenario selected in the configuration file
+BatteryScenario LoadScenario()
+{
+    osal_id_t file;
+
+    if (OS_OpenCreate(&file, "/cf/scenario.cfg",
+                      OS_FILE_FLAG_NONE, OS_READ_ONLY) != OS_SUCCESS)
+    {
+        CFE_EVS_SendEvent(7, CFE_EVS_EventType_ERROR,
+                          "Scenario file not found. Using Normal Operation.");
+        return BatteryScenario::Normal;
+    }
+
+    char buffer[256] = {};
+    int32 bytesRead = OS_read(file, buffer, sizeof(buffer) - 1);
+
+    OS_close(file);
+
+    if (bytesRead > 0)
+    {
+        std::istringstream lines(std::string(buffer, bytesRead));
+        std::string line;
+
+        while (std::getline(lines, line))
+        {
+            // Handle Windows and Linux line endings
+            if (!line.empty() && line.back() == '\r')
+            {
+                line.pop_back();
+            }
+
+            if (line == "scenario=1")
+            {
+                return BatteryScenario::Normal;
+            }
+            else if (line == "scenario=2")
+            {
+                return BatteryScenario::ExtendedEclipse;
+            }
+            else if (line == "scenario=3")
+            {
+                return BatteryScenario::HighLoad;
+            }
+        }
+    }
+
+    CFE_EVS_SendEvent(7, CFE_EVS_EventType_ERROR,
+                      "Invalid scenario configuration. Using Normal Operation.");
+
+    return BatteryScenario::Normal;
+}
 
 // Starts the battery monitor app
 extern "C" void BATMON_Main(void)
@@ -20,7 +72,8 @@ extern "C" void BATMON_Main(void)
         return;
     }
 
-    // Load the selected scenario settings
+    // Load the selected scenario from the configuration file
+    BatteryScenario selectedScenario = LoadScenario();
     ScenarioSettings settings = GetScenarioSettings(selectedScenario);
 
     const char* scenarioName = "Normal Operation";
@@ -47,7 +100,6 @@ extern "C" void BATMON_Main(void)
     // Run the battery simulation
     while (CFE_ES_RunLoop(&runStatus))
     {
-        // Record the phase and status before advancing
         bool wasInSunlight = state.inSunlight;
         BatteryStatus previousStatus = state.status;
 
@@ -83,7 +135,7 @@ extern "C" void BATMON_Main(void)
             }
         }
 
-        // Report when the simulation switches phases
+        // Report sunlight and eclipse transitions
         if (phaseChanged)
         {
             CFE_EVS_SendEvent(4, CFE_EVS_EventType_INFORMATION,
