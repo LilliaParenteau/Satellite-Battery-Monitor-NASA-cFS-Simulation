@@ -37,43 +37,38 @@ int main()
 
     ScenarioSettings settings = GetScenarioSettings(scenario);
 
-    int batteryLevel = settings.startingLevel;
-    int warningThreshold = 20;
-    int criticalThreshold = 10;
+    const int warningThreshold = 20;
+    const int criticalThreshold = 10;
 
-    bool inSunlight = true;
-    int phaseTime = 0;
-
-    BatteryStatus previousStatus = GetBatteryStatus(
-        batteryLevel, warningThreshold, criticalThreshold);
+    // Initialize the shared simulation
+    SimulationState state = StartSimulation(
+        settings, warningThreshold, criticalThreshold);
 
     cout << "\nRunning: " << scenarioName << "\n";
-    cout << "Starting battery: " << batteryLevel << "%\n\n";
+    cout << "Starting battery: " << state.batteryLevel << "%\n\n";
 
     // Run 40 simulation steps
     for (int step = 1; step <= 40; step++)
     {
-        batteryLevel = UpdateBatteryForPhase(
-            batteryLevel,
-            inSunlight,
-            settings.chargeRate,
-            settings.dischargeRate);
+        // Record the phase and status before advancing
+        bool wasInSunlight = state.inSunlight;
+        BatteryStatus previousStatus = state.status;
+
+        bool phaseChanged = AdvanceSimulation(
+            state, settings, warningThreshold, criticalThreshold);
 
         cout << "Step " << step << " | "
-             << (inSunlight ? "Sunlight" : "Eclipse")
-             << " | Battery: " << batteryLevel << "%\n";
+             << (wasInSunlight ? "Sunlight" : "Eclipse")
+             << " | Battery: " << state.batteryLevel << "%\n";
 
         // Report changes in battery status
-        BatteryStatus currentStatus = GetBatteryStatus(
-            batteryLevel, warningThreshold, criticalThreshold);
-
-        if (currentStatus != previousStatus)
+        if (state.status != previousStatus)
         {
-            if (currentStatus == BatteryStatus::Warning)
+            if (state.status == BatteryStatus::Warning)
             {
                 cout << "  WARNING: Low battery!\n";
             }
-            else if (currentStatus == BatteryStatus::Critical)
+            else if (state.status == BatteryStatus::Critical)
             {
                 cout << "  CRITICAL: Battery level dangerously low!\n";
             }
@@ -81,21 +76,14 @@ int main()
             {
                 cout << "  Battery recovered to normal.\n";
             }
-
-            previousStatus = currentStatus;
         }
 
-        phaseTime++;
-
-        int phaseDuration = inSunlight
-            ? settings.sunlightDuration
-            : settings.eclipseDuration;
-
-        // Switch between sunlight and eclipse
-        if (phaseTime >= phaseDuration)
+        // Report changes between sunlight and eclipse
+        if (phaseChanged)
         {
-            inSunlight = !inSunlight;
-            phaseTime = 0;
+            cout << "  Entering "
+                 << (state.inSunlight ? "Sunlight" : "Eclipse")
+                 << "\n";
         }
     }
 

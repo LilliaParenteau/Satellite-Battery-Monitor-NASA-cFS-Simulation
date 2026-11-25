@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "make native_std.prep",
             "options": {
-                "cwd": "/home/LilliaP/cFS"
+                "cwd": "${env:HOME}/cFS"
             },
             "problemMatcher": []
         },
@@ -15,7 +15,7 @@
             "type": "shell",
             "command": "make native_std.install",
             "options": {
-                "cwd": "/home/LilliaP/cFS"
+                "cwd": "${env:HOME}/cFS"
             },
             "group": "build",
             "problemMatcher": []
@@ -24,8 +24,10 @@
             "label": "Run cFS",
             "type": "shell",
             "command": "./core-cpu1",
+            "dependsOn": "Build cFS",
+            "dependsOrder": "sequence",
             "options": {
-                "cwd": "/home/LilliaP/cFS/build-native_std/exe/cpu1"
+                "cwd": "${env:HOME}/cFS/build-native_std/exe/cpu1"
             },
             "problemMatcher": []
         },

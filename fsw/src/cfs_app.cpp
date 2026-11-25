@@ -37,75 +37,58 @@ extern "C" void BATMON_Main(void)
     CFE_EVS_SendEvent(1, CFE_EVS_EventType_INFORMATION,
                       "Battery Monitor started: %s", scenarioName);
 
-    int batteryLevel = settings.startingLevel;
-    int warningThreshold = 20;
-    int criticalThreshold = 10;
+    const int warningThreshold = 20;
+    const int criticalThreshold = 10;
 
-    bool inSunlight = true;
-    int phaseTime = 0;
+    // Initialize the shared simulation
+    SimulationState state = StartSimulation(
+        settings, warningThreshold, criticalThreshold);
 
-    BatteryStatus previousStatus = GetBatteryStatus(
-        batteryLevel, warningThreshold, criticalThreshold);
-
-    // Simulate battery charging and discharging
+    // Run the battery simulation
     while (CFE_ES_RunLoop(&runStatus))
     {
-        batteryLevel = UpdateBatteryForPhase(
-            batteryLevel,
-            inSunlight,
-            settings.chargeRate,
-            settings.dischargeRate);
+        // Record the phase and status before advancing
+        bool wasInSunlight = state.inSunlight;
+        BatteryStatus previousStatus = state.status;
 
-        const char* phase = inSunlight ? "Sunlight" : "Eclipse";
+        bool phaseChanged = AdvanceSimulation(
+            state, settings, warningThreshold, criticalThreshold);
+
+        const char* phase = wasInSunlight ? "Sunlight" : "Eclipse";
 
         CFE_EVS_SendEvent(2, CFE_EVS_EventType_INFORMATION,
                           "Phase: %s | Battery: %d%%",
-                          phase, batteryLevel);
+                          phase, state.batteryLevel);
 
-        // Check the current battery status
-        BatteryStatus currentStatus = GetBatteryStatus(
-            batteryLevel, warningThreshold, criticalThreshold);
-
-        // Report events only when the battery status changes
-        if (currentStatus != previousStatus)
+        // Report events only when battery status changes
+        if (state.status != previousStatus)
         {
-            if (currentStatus == BatteryStatus::Warning)
+            if (state.status == BatteryStatus::Warning)
             {
                 CFE_EVS_SendEvent(3, CFE_EVS_EventType_ERROR,
                                   "Warning: Battery low at %d%%",
-                                  batteryLevel);
+                                  state.batteryLevel);
             }
-            else if (currentStatus == BatteryStatus::Critical)
+            else if (state.status == BatteryStatus::Critical)
             {
                 CFE_EVS_SendEvent(5, CFE_EVS_EventType_ERROR,
                                   "Critical: Battery at %d%%",
-                                  batteryLevel);
+                                  state.batteryLevel);
             }
             else
             {
                 CFE_EVS_SendEvent(6, CFE_EVS_EventType_INFORMATION,
                                   "Battery recovered to normal: %d%%",
-                                  batteryLevel);
+                                  state.batteryLevel);
             }
-
-            previousStatus = currentStatus;
         }
 
-        phaseTime++;
-
-        // Use the selected scenario's phase durations
-        int phaseDuration = inSunlight
-            ? settings.sunlightDuration
-            : settings.eclipseDuration;
-
-        if (phaseTime >= phaseDuration)
+        // Report when the simulation switches phases
+        if (phaseChanged)
         {
-            inSunlight = !inSunlight;
-            phaseTime = 0;
-
             CFE_EVS_SendEvent(4, CFE_EVS_EventType_INFORMATION,
                               "Entering %s",
-                              inSunlight ? "Sunlight" : "Eclipse");
+                              state.inSunlight ? "Sunlight" : "Eclipse");
         }
 
         OS_TaskDelay(1000);

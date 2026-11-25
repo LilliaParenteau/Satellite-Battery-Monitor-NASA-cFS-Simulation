@@ -2,16 +2,15 @@
     "configurations": [
         {
             "name": "Linux",
-            "intelliSenseMode": "linux-gcc-x64",
-            "compileCommands": [
-                "${workspaceFolder}/../../build-native_std/native/default_cpu1/compile_commands.json"
-            ],
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/../../cfe/modules/core_api/fsw/inc",
-                "${workspaceFolder}/../../osal/src/os/inc",
-                "/home/LilliaP/cFS/**"
-            ]
+                "${env:HOME}/cFS/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

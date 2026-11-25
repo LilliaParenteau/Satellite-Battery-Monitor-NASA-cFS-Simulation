@@ -17,12 +17,6 @@ int UpdateBatteryLevel(int currentLevel, int change)
     return newLevel;
 }
 
-// Check whether the battery has reached the warning threshold
-bool IsBatteryLow(int batteryLevel, int warningThreshold)
-{
-    return batteryLevel <= warningThreshold;
-}
-
 // Charge during sunlight and discharge during an eclipse
 int UpdateBatteryForPhase(int currentLevel, bool inSunlight,
                           int chargeRate, int dischargeRate)
@@ -31,10 +25,8 @@ int UpdateBatteryForPhase(int currentLevel, bool inSunlight,
     {
         return UpdateBatteryLevel(currentLevel, chargeRate);
     }
-    else
-    {
-        return UpdateBatteryLevel(currentLevel, -dischargeRate);
-    }
+
+    return UpdateBatteryLevel(currentLevel, -dischargeRate);
 }
 
 // Determine the current battery status
@@ -70,4 +62,53 @@ ScenarioSettings GetScenarioSettings(BatteryScenario scenario)
     }
 
     return {70, 5, 10, 5, 5};
+}
+
+// Initialize the battery simulation
+SimulationState StartSimulation(const ScenarioSettings& settings,
+                                int warningThreshold,
+                                int criticalThreshold)
+{
+    SimulationState state;
+
+    state.batteryLevel = settings.startingLevel;
+    state.inSunlight = true;
+    state.phaseTime = 0;
+    state.status = GetBatteryStatus(
+        state.batteryLevel, warningThreshold, criticalThreshold);
+
+    return state;
+}
+
+// Advance the simulation by one step
+bool AdvanceSimulation(SimulationState& state,
+                       const ScenarioSettings& settings,
+                       int warningThreshold,
+                       int criticalThreshold)
+{
+    state.batteryLevel = UpdateBatteryForPhase(
+        state.batteryLevel,
+        state.inSunlight,
+        settings.chargeRate,
+        settings.dischargeRate);
+
+    state.status = GetBatteryStatus(
+        state.batteryLevel, warningThreshold, criticalThreshold);
+
+    state.phaseTime++;
+
+    int phaseDuration = state.inSunlight
+        ? settings.sunlightDuration
+        : settings.eclipseDuration;
+
+    // Switch phases when the current duration is reached
+    if (state.phaseTime >= phaseDuration)
+    {
+        state.inSunlight = !state.inSunlight;
+        state.phaseTime = 0;
+
+        return true;
+    }
+
+    return false;
 }

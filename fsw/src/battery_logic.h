@@ -27,20 +27,40 @@ struct ScenarioSettings
     int eclipseDuration;
 };
 
+// Current state of the battery simulation
+struct SimulationState
+{
+    int batteryLevel;
+    bool inSunlight;
+    int phaseTime;
+    BatteryStatus status;
+};
+
+// Update battery charge and keep it between 0% and 100%
 int UpdateBatteryLevel(int currentLevel, int change);
 
-bool IsBatteryLow(int batteryLevel, int warningThreshold);
-
-// Update battery based on sunlight or eclipse conditions
+// Update the battery during sunlight or eclipse
 int UpdateBatteryForPhase(int currentLevel, bool inSunlight,
                           int chargeRate, int dischargeRate);
 
-// Determine battery status using warning and critical thresholds
+// Determine battery status
 BatteryStatus GetBatteryStatus(int batteryLevel,
                                int warningThreshold,
                                int criticalThreshold);
 
-// Get settings for the selected simulation scenario
+// Get settings for the selected scenario
 ScenarioSettings GetScenarioSettings(BatteryScenario scenario);
+
+// Set up a new simulation
+SimulationState StartSimulation(const ScenarioSettings& settings,
+                                int warningThreshold,
+                                int criticalThreshold);
+
+// Advance the simulation by one step
+// Returns true when the sunlight/eclipse phase changes
+bool AdvanceSimulation(SimulationState& state,
+                       const ScenarioSettings& settings,
+                       int warningThreshold,
+                       int criticalThreshold);
 
 #endif
