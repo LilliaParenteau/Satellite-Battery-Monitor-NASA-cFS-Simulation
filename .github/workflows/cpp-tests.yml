@@ -33,11 +33,33 @@ jobs:
         run: |
           for choice in 1 2 3
           do
+            case "$choice" in
+              1)
+                name="Normal Operation"
+                expected="Step 6 | Eclipse | Battery: 85%"
+                ;;
+              2)
+                name="Extended Eclipse"
+                expected="Step 4 | Eclipse | Battery: 75%"
+                ;;
+              3)
+                name="High Power Consumption"
+                expected="Step 6 | Eclipse | Battery: 65%"
+                ;;
+            esac
+
             output=$(printf '%s\n' "$choice" | ./battery_demo)
-            echo "$output" | grep -q "Simulation complete."
+
+            grep -Fq "Running: $name" <<< "$output"
+            grep -Fq "$expected" <<< "$output"
+            grep -Fq "Simulation complete." <<< "$output"
           done
 
       - name: Test invalid scenario selection
         run: |
-          output=$(printf '4\n' | ./battery_demo || true)
-          echo "$output" | grep -q "Invalid scenario selection."
+          if output=$(printf '4\n' | ./battery_demo); then
+            echo "Invalid selection should return an error."
+            exit 1
+          fi
+
+          grep -Fq "Invalid scenario selection." <<< "$output"

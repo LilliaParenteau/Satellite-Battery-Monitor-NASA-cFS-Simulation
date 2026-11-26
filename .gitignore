@@ -1,4 +1,3 @@
-
 # Build files
 build/
 build-*/
@@ -13,6 +12,8 @@ Makefile
 *.obj
 *.exe
 *.out
+/battery_demo
+/battery_test
 
 # Temporary files
 *.log
