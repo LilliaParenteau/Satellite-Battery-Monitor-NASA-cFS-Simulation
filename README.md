@@ -4,6 +4,10 @@ A C++17 battery simulation built for NASA's Core Flight System (cFS). The applic
 
 The repository also includes a standalone C++ demo that runs without cFS and automated tests for the shared simulation logic.
 
+## Project Motivation
+
+Growing up on Florida's Space Coast instilled in me a sense of pride and appreciation for the space industry and the engineering behind it. This project was an opportunity to explore spacecraft software development while applying my experience in C++ programming, simulation, and software testing.
+
 ## Features
 
 - Simulated charging and discharging during sunlight and eclipse periods
@@ -153,6 +157,12 @@ The cFS application and all three scenarios have also been tested locally in WSL
 
 C++17 · NASA cFS/OSAL · CMake · GCC/G++ · Ubuntu/WSL · VS Code · GitHub Actions
 
-## Project Scope
+## Acknowledgments
 
-This is a software simulation for practicing C++ development and integration with NASA cFS. It does not use physical battery hardware, satellite telemetry, or a detailed spacecraft power model.
+This project uses NASA's open-source [Core Flight System (cFS)](https://github.com/nasa/cFS) as its flight software framework. The official cFS documentation and sample mission served as references for application integration and configuration.
+
+## Project Scope and Disclaimer
+
+This independently developed software simulation is intended for educational and experimental purposes. It does not use physical battery hardware, satellite telemetry, or a detailed spacecraft power model.
+
+This project is not affiliated with, sponsored by, or endorsed by NASA and is not intended for operational spacecraft deployment.
